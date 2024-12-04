@@ -1,5 +1,3 @@
-import 'dart:ui_web';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_testing_app/cricketscror.dart';
 import 'package:flutter/material.dart';
@@ -12,63 +10,64 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  FirebaseFirestore _firebaseFirestore = FirebaseFirestore.instance;
-  List<Cricketscore> _cricketScorelist=[];
-   bool _inprogress = false;
+  final List<Cricketscore> _cricketScorelist = [];
 
-  Future<void> _getscricketscore()async{
-    _inprogress=true;
-  _cricketScorelist.clear();
-  final QuerySnapshot snapshot = await _firebaseFirestore.collection('cricket').get();
-  for(DocumentSnapshot doc in snapshot.docs){
-      _cricketScorelist.add(Cricketscore.formJson( doc.id,doc.data()as Map<String,dynamic>));
-  }
-    _inprogress=false;
-    setState(() {
-  });
-
-  }
-  @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-  _getscricketscore();
+  void _extractdata(QuerySnapshot<Map<String, dynamic>>? snapshot) {
+    _cricketScorelist.clear();
+    for (DocumentSnapshot doc in snapshot?.docs ?? []) {
+      _cricketScorelist.add(
+          Cricketscore.formJson(doc.id, doc.data() as Map<String, dynamic>));
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Live score"),
+        title: const Text("Live score"),
       ),
-      body: Column(
-        children: [
-          Expanded(
-            child: Visibility(
-              visible: _inprogress==false,
-              replacement: const CircularProgressIndicator(),
-              child: ListView.builder(
+      body: StreamBuilder(
+          stream: FirebaseFirestore.instance.collection("cricket").snapshots(),
+          builder: (context,
+              AsyncSnapshot<QuerySnapshot<Map<String, dynamic>>> snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(
+                child: CircularProgressIndicator(),
+              );
+            }
+            if (snapshot.hasError) {
+              return Center(
+                child: Text(snapshot.error.toString()),
+              );
+            }
+            if (snapshot.hasData) {
+              _extractdata(snapshot.data);
+              return ListView.builder(
                   itemCount: _cricketScorelist.length,
-                  itemBuilder: (context,index){
-                    Cricketscore cricketscore= _cricketScorelist[index];
+                  itemBuilder: (context, index) {
+                    Cricketscore cricketscore = _cricketScorelist[index];
                     return ListTile(
-                      leading: Badge(
-                      backgroundColor:_indicatior(cricketscore.isMatchRunning),
+                      leading: CircleAvatar(
+                        backgroundColor:
+                            _indicatior(cricketscore.isMatchRunning),
                       ),
-                      title: Text(cricketscore.matchId),
-                      subtitle: Text("Team 1 :${cricketscore.teamoneName} Team 2 : ${cricketscore.teamtwoName}"),
-                      trailing: Text("${cricketscore.teamoneScore}/${cricketscore.teamotwoScore}"),
+                      title: Text(
+                        cricketscore.matchId,
+                        style: TextStyle(fontSize: 24),
+                      ),
+                      subtitle: Text(
+                          "Team 1 :${cricketscore.teamone} \nTeam 2 : ${cricketscore.teamtwo}\n WinnerTeam:${cricketscore.teamWinner == '' ? 'Pending' : cricketscore.teamWinner}"),
+                      trailing: Text(
+                          "${cricketscore.teamoneScore}/${cricketscore.teamotwoScore}"),
                     );
-              }),
-            ),
-          )
-        ],
-      ),
+                  });
+            }
+            return SizedBox();
+          }),
     );
   }
-  Color _indicatior(bool isMatchrunning){
-    return isMatchrunning? Colors.green: Colors.grey;
+
+  Color _indicatior(bool isMatchrunning) {
+    return isMatchrunning ? Colors.green : Colors.grey;
   }
-
-
 }

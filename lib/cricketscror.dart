@@ -1,14 +1,14 @@
 class Cricketscore {
   final String matchId;
-  final String teamoneName;
-  final String teamtwoName;
+  final String teamone;
+  final String teamtwo;
   final int teamoneScore;
   final int teamotwoScore;
   final bool isMatchRunning;
   final String teamWinner;
 
-  Cricketscore( {required this.teamoneName,
-    required this.teamtwoName,
+  Cricketscore( {required this.teamone,
+    required this.teamtwo,
     required this.teamoneScore,
     required this.teamotwoScore,
     required this.isMatchRunning,
@@ -17,12 +17,12 @@ class Cricketscore {
   factory Cricketscore.formJson( String id,Map<String, dynamic>json){
     return Cricketscore(
         matchId: id,
-        teamoneName: json['teamoneName'],
-        teamtwoName: json[ "teamtwoName"],
-        teamoneScore: json[ "teamoneScore"],
-        teamotwoScore: json["teamoneScore"],
-        isMatchRunning:json["isMatchRunning"],
-        teamWinner: json[ "teamWinner"]);
+        teamone: json['teamone'],
+        teamtwo: json[ "teamtwo"],
+        teamoneScore: json[ "teamonescore"],
+        teamotwoScore: json["teamonescore"],
+        isMatchRunning:json["ismatchrunning"],
+        teamWinner: json[ "winnerteam"]);
   }
 
 }
