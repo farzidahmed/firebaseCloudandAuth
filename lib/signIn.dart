@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_testing_app/fcm_notification_manager.dart';
 import 'package:firebase_testing_app/home.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -21,6 +22,7 @@ class _SigninState extends State<Signin> {
     }).onError((error, StackTrace) {
       print("failed${error.toString()}");
     });
+     await FcmNotificationManager.initialize();
   }
 
   @override
